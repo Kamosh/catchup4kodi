@@ -173,22 +173,27 @@ def LIVE(url):
     try:
         link = OPEN_URL('https://www.itv.com/hub/tv-guide')
 
-        link = link.split('class="guide__item')
+        link = link.split('class="guide__item ')
         for p in link:
-            if 'watch live' in p.lower():
+            if 'title="watch live' in p.lower():                
 
                 title = '[COLOR orange]'+re.compile('title="(.+?)"').findall(p)[0].replace('amp;','')+'[/COLOR]'
                 channel = re.compile('live on (.+?)"').findall(p)[0]
+                stream_urls = re.compile('complex-link" href="(.+?)"').findall(p)
+                if len(stream_urls) > 0:
+                    stream_url = stream_urls[0]
+                else:
+                    # URL for the live stream not found, no item will be added to the menu
+                    continue
                 sim, icon_num=getsim(channel)
                 if livepro=='true':
                     mode = 8
                 else:
                     mode = 7
                     sim = 'itv'+icon_num
-                    
                 if url=='dont':
                     name = '[COLOR plum]On Now[/COLOR] - [COLOR green]%s[/COLOR] - %s' % (channel,title)
-                    addDir(name,sim,mode,foricon+'art/%s.png' % icon_num,isFolder=False)
+                    addDir(name,stream_url,mode,foricon+'art/%s.png' % icon_num,isFolder=False)
                 else:
                     addDir(channel + ' - '+title,sim,mode,foricon+'art/%s.png' % icon_num,isFolder=False)
                 
@@ -1064,7 +1069,6 @@ def addDir(name,url,mode,iconimage,plot='',isFolder=True):
         u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)
         ok=True
         liz=xbmcgui.ListItem(name,iconImage="DefaultVideo.png", thumbnailImage=iconimage)
-        liz.setInfo( type="Video", infoLabels={ "Title": name, "Plot": plot,'Premiered' : '2012-01-01','Episode' : '7-1' } )
         liz.setProperty('Fanart_Image', iconimage.replace('w=512&h=288','w=1280&h=720'))
         menu=[]
         if mode == 2:
@@ -1146,11 +1150,13 @@ elif mode==6:
         STREAMS()
 elif mode==7:
         print "Getting Videofiles: "+url
-        PLAY_STREAM(name,url,iconimage)
+        VIDEO(url, iconimage)
+        #PLAY_STREAM(name,url,iconimage)
 
 elif mode==8:
         print "Getting Videofiles: "+url
-        PLAY_STREAM_HLS_LIVE(name,url,iconimage)        
+        VIDEO(url, iconimage)
+        #PLAY_STREAM_HLS_LIVE(name,url,iconimage)        
 
 elif mode==12:
     print ""
