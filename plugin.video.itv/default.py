@@ -175,7 +175,7 @@ def LIVE(url):
 
         link = link.split('class="guide__item ')
         for p in link:
-            if 'title="watch live' in p.lower():                
+            if 'title="watch live' in p.lower():
 
                 title = '[COLOR orange]'+re.compile('title="(.+?)"').findall(p)[0].replace('amp;','')+'[/COLOR]'
                 channel = re.compile('live on (.+?)"').findall(p)[0]
